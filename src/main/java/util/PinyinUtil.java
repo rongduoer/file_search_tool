@@ -28,6 +28,8 @@ public class PinyinUtil {
         //特殊拼音由v代替 绿 -> v
         FORMAT.setVCharType(HanyuPinyinVCharType.WITH_V);
     }
+    // 所有的中文对应的Unicode编码区间
+    private static final String CHINESE_PATTERN = "[\\u4E00-\\u9FA5]";
 
     /**
      * 传入任意的文件名称，将该文件名称转为字母字符串全拼和首字母小写字符串
@@ -66,10 +68,13 @@ public class PinyinUtil {
         return ret;
 
     }
-
-    public static void main(String[] args) throws BadHanyuPinyinOutputFormatCombination {
-        String str = "中古哦s";
-        String[] ret = getPinyinByFileName(str);
-        System.out.println(Arrays.toString(ret));
+    /**
+     * 判断给定的字符串是否包含中文字符
+     * @param str
+     * @return
+     */
+    public static boolean containsChinese(String str) {
+        //匹配
+        return str.matches(".*" + CHINESE_PATTERN + ".*");
     }
 }
