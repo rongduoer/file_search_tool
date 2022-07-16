@@ -1,4 +1,3 @@
--- drop table if exists file_meta;
 create table if not exists file_meta(
     name varchar(50) not null,
     path varchar(100) not null,
