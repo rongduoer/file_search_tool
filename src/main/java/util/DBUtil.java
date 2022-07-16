@@ -5,8 +5,7 @@ import org.sqlite.SQLiteDataSource;
 
 import javax.sql.DataSource;
 import java.io.File;
-import java.sql.Connection;
-import java.sql.SQLException;
+import java.sql.*;
 
 /**
  * @author: rongduo
@@ -54,5 +53,32 @@ public class DBUtil {
      */
     public static Connection getConnection() throws SQLException {
         return getDataSource().getConnection();
+    }
+
+    public static void close(Connection connection, Statement statement){
+        if (connection != null){
+            try {
+                connection.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+        if (statement != null){
+            try {
+                statement.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
+    }
+    public static void close(Connection connection, PreparedStatement ps, ResultSet rs) {
+        close(connection,ps);
+        if (rs != null){
+            try {
+                rs.close();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 }
