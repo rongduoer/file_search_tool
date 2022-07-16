@@ -33,9 +33,9 @@ public class DBinit {
                 if ("".equals(str) || "\r\n".equals(str)) {
                     continue;
                 }
-                if (str.contains("--")) {
-                    str = str.replaceAll("--", "");
-                }
+//                if (str.contains("--")) {
+//                    str = str.replaceAll("--", "");
+//                }
                 ret.add(str);
             }
         } catch (Exception e){
