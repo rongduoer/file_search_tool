@@ -14,8 +14,10 @@ import java.sql.*;
  */
 public class DBUtil {
     //获取数据源方法，设置为单例模式获取数据源对象
-    private static volatile DataSource DATASOURCE;
+    private volatile static DataSource DATASOURCE;
     //提供方法，获取单例模式的唯一实例，数据源不能让外部使用，所以用private
+    //单例数据连接
+    private volatile static Connection CONNECTION;
     private static DataSource getDataSource(){
         if (DATASOURCE == null){
             //多线程下，仅有一个线程能进入同步代码块
@@ -24,7 +26,7 @@ public class DBUtil {
                 if (DATASOURCE == null){
                     //SQLite没有账户密码，只需要配置日期格式即可
                     SQLiteConfig config = new SQLiteConfig();
-                    config.setDateStringFormat(Util.DATA_PATTERN);
+                    config.setDateStringFormat(Util.DATE_PATTERN);
                     DATASOURCE = new SQLiteDataSource();
                     //向下转型
                     ((SQLiteDataSource) DATASOURCE).setUrl(getUrl());
@@ -48,21 +50,22 @@ public class DBUtil {
 
     /**
      * 获取数据库链接
+     * 多线程场景下，要求SQLite多个线程使用同一个链接进行处理
      * @return
      * @throws SQLException
      */
     public static Connection getConnection() throws SQLException {
-        return getDataSource().getConnection();
-    }
-
-    public static void close(Connection connection, Statement statement){
-        if (connection != null){
-            try {
-                connection.close();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
+        if (CONNECTION == null){
+            synchronized (DBUtil.class){
+                if (CONNECTION == null){
+                    CONNECTION = getDataSource().getConnection();
+                }
             }
         }
+        return CONNECTION;
+    }
+
+    public static void close(Statement statement){
         if (statement != null){
             try {
                 statement.close();
@@ -71,8 +74,8 @@ public class DBUtil {
             }
         }
     }
-    public static void close(Connection connection, PreparedStatement ps, ResultSet rs) {
-        close(connection,ps);
+    public static void close(PreparedStatement ps, ResultSet rs) {
+        close(ps);
         if (rs != null){
             try {
                 rs.close();
