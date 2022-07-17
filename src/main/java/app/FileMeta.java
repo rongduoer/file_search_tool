@@ -61,6 +61,4 @@ public class FileMeta {
     private String pinYin;
     //首字母
     private String pinYinFirst;
-
-
 }
