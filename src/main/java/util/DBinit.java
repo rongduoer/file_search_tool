@@ -33,9 +33,9 @@ public class DBinit {
                 if ("".equals(str) || "\r\n".equals(str)) {
                     continue;
                 }
-//                if (str.contains("--")) {
-//                    str = str.replaceAll("--", "");
-//                }
+                if (str.contains("--")) {
+                    str = str.replaceAll("--", "");
+                }
                 ret.add(str);
             }
         } catch (Exception e){
@@ -67,11 +67,7 @@ public class DBinit {
             System.out.println("数据库初始化失败");
             e.printStackTrace();
         } finally {
-            DBUtil.close(connection,statement);
+            DBUtil.close(statement);
         }
-    }
-
-    public static void main(String[] args) {
-        init();
     }
 }
