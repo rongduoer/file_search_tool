@@ -71,7 +71,7 @@ public class Controller implements Initializable {
         //进行文件扫描任务时，需要决定将信息保存到哪个终端
         FileScanner fileScanner = new FileScanner(new FileSave2DB());
         if (scanThread != null){
-            //创建过任务，且改任务还没执行结束
+            //创建过任务，且改任务还没执行完成
             scanThread.interrupt();
         }
         scanThread = new Thread(() -> {
