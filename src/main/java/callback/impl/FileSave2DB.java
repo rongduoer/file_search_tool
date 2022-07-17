@@ -2,9 +2,7 @@ package callback.impl;
 
 import app.FileMeta;
 import callback.FileScannerCallBack;
-import com.sun.jmx.snmp.SnmpNull;
-import org.sqlite.core.DB;
-import task.FileScanner;
+
 import util.DBUtil;
 import util.PinyinUtil;
 
@@ -21,7 +19,7 @@ import java.util.List;
  */
 public class FileSave2DB implements FileScannerCallBack {
     @Override
-    public void callBack(File dir) {
+    public void callback(File dir) {
         //列举当前dir路径下的所有文件对象
         File[] files = dir.listFiles();
         //边界,确保不为空
@@ -34,10 +32,10 @@ public class FileSave2DB implements FileScannerCallBack {
                 FileMeta meta = new FileMeta();
                 if (file.isDirectory()){
                     //文件夹
-                    setCommonFiled(file.getName(),file.getPath(),true,file.lastModified(),meta);
+                    setCommonFiled(file.getName(),file.getParent(),true,file.lastModified(),meta);
                 } else {
                     //文件
-                    setCommonFiled(file.getName(),file.getPath(),false,file.lastModified(),meta);
+                    setCommonFiled(file.getName(),file.getParent(),false,file.lastModified(),meta);
                     meta.setSize(file.length());
                 }
                 //保存到集合中
@@ -72,12 +70,33 @@ public class FileSave2DB implements FileScannerCallBack {
         PreparedStatement ps = null;
         try{
             connection = DBUtil.getConnection();
-
+            String sql = "delete from file_meta where " +
+                    "(name = ? and path = ?)";
+            if (meta.getIsDirectory()){
+                //文件夹
+                sql += " or path = ?"; //删除子文件夹的第一级目录
+                sql += " or path like ?"; //删除多级目录
+            }
+            ps = connection.prepareStatement(sql);
+            ps.setString(1,meta.getName());
+            ps.setString(2, meta.getPath());
+            if (meta.getIsDirectory()){
+                ps.setString(3,meta.getPath() + File.separator + meta.getName());  //删一级目录
+                ps.setString(4,meta.getPath() + File.separator + meta.getName()
+                        + File.separator + "%"); //子文件夹和子文件
+            }
+//            System.out.println("执行删除操作，SQL语句 : " + sql);
+            int rows = ps.executeUpdate();
+//            if (meta.getIsDirectory()){
+//                System.out.println("删除文件夹" + meta.getName() + "成功,共删除" + rows + "个文件");
+//            } else{
+//                System.out.println("删除文件" + meta.getName() + "成功");
+//            }
         } catch (SQLException e){
             System.err.println("文件删除出错，请检查SQL语句");
             e.printStackTrace();
         } finally {
-            DBUtil.close(connection,ps);
+            DBUtil.close(ps);
         }
     }
 
@@ -108,14 +127,14 @@ public class FileSave2DB implements FileScannerCallBack {
                 ps.setString(6,pinyins[0]);
                 ps.setString(7,pinyins[1]);
             }
-            System.out.println("执行文件保存操作，SQL为 : " + ps);
+//            System.out.println("执行文件保存操作，SQL为 : " + ps);
             int rows = ps.executeUpdate();
-            System.out.println("成功保存 " + rows + "行文件信息");
+//            System.out.println("成功保存 " + rows + "行文件信息");
         }catch (SQLException e) {
             System.err.println("保存文件信息出错，请检查SQL语句");
             e.printStackTrace();
         }finally {
-            DBUtil.close(connection,ps);
+            DBUtil.close(ps);
         }
     }
 
@@ -138,7 +157,7 @@ public class FileSave2DB implements FileScannerCallBack {
             ps = connection.prepareStatement(sql);
             ps.setString(1,dir.getPath());
             rs = ps.executeQuery();
-            System.out.println("查询指定路径的SQL为 : " + ps);
+//            System.out.println("查询指定路径的SQL为 : " + ps);
             while (rs.next()){
                 FileMeta meta = new FileMeta();
                 meta.setName(rs.getString("name"));
@@ -157,7 +176,7 @@ public class FileSave2DB implements FileScannerCallBack {
             System.out.println("查询数据库中指定路径下的文件出错，请检查SQL语句");
             e.printStackTrace();
         } finally {
-            DBUtil.close(connection,ps,rs);
+            DBUtil.close(ps,rs);
         }
         return dbFiles;
     }
