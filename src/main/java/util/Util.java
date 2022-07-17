@@ -11,7 +11,7 @@ import java.util.Date;
  */
 public class Util {
     //Sqlite日期格式
-    public static final String DATA_PATTERN = "yyyy-MM-dd HH:mm:ss";
+    public static final String DATE_PATTERN = "yyyy-MM-dd HH:mm:ss";
 
     /**
      * 单位转换
@@ -21,7 +21,7 @@ public class Util {
     public static String parseSize(Long size) {
         String[] unit = {"B","KB","MB","GB"};
         int flag = 0;
-        while(size > 1024){
+        while (size > 1024) {
             size /= 1024;
             flag ++;
         }
@@ -33,8 +33,8 @@ public class Util {
      * @param directory
      * @return
      */
-    public static String parsetFileType(Boolean directory) {
-        return directory ? "文件夹":"文件";
+    public static String parseFileType(Boolean directory) {
+        return directory ? "文件夹" : "文件";
     }
 
     /**
@@ -42,13 +42,7 @@ public class Util {
      * @param lastModified
      * @return
      */
-    public static String parseData(Date lastModified) {
-        //将日期类型转换为相应的格式
-        return new SimpleDateFormat(DATA_PATTERN).format(lastModified);
+    public static String parseDate(Date lastModified) {
+        return new SimpleDateFormat(DATE_PATTERN).format(lastModified);
     }
-
-
-
-
-
 }
